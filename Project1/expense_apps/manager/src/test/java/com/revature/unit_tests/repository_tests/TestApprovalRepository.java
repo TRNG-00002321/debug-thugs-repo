@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class TestApprovalRepository {
+public class                                            TestApprovalRepository {
     @Mock
     private DatabaseConnection db;
 
