@@ -1,11 +1,11 @@
 import os
 import pytest
-from src.main import create_app
+from main import create_app
 from src.repository import DatabaseConnection
 
 TEST_DB_PATH = os.path.abspath(os.path.join(
     os.path.dirname(__file__),
-    "../../test_db/test_expense_manager.db"
+    "../../../test_db/test_expense_manager.db"
 ))
 SEED_SQL_PATH = os.path.abspath(os.path.join(
     os.path.dirname(__file__),

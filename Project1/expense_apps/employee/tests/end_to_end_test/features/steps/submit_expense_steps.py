@@ -70,25 +70,47 @@ def step_go_to_expenses(context):
     return context.dashboard_page.go_to_view_my_expenses_screen()
 
 
+# Could be flaky
 @then(u'the expense is shown with the amount: "{amount}", description: "{description}", and the date: "{date}"')
 def step_expense_is_shown(context, amount, description, date):
-     context.dashboard_page = DashboardPage(context.driver)
+    context.dashboard_page = DashboardPage(context.driver)
+    wait = WebDriverWait(context.driver, 10)
 
-     context.dashboard_page.wait_for_element((By.XPATH, f"//td[contains(text(), '{date}')]"))
-     context.dashboard_page.wait_for_element((By.XPATH, f"//td[contains(text(), '${amount}')]"))
-     context.dashboard_page.wait_for_element((By.XPATH, f"//td[contains(text(), '{description}')]"))
-     #time.sleep(1)
-     rows = context.driver.find_elements(By.TAG_NAME, "tr")
-     found = False
-     expected_amount = "$" + amount
-     for row in rows[1:]:
-         row_date = row.find_element(By.CSS_SELECTOR, "td:nth-child(1)").text
-         row_amount = row.find_element(By.CSS_SELECTOR, "td:nth-child(2)").text
-         row_description = row.find_element(By.CSS_SELECTOR, "td:nth-child(3)").text
-         if row_date == date and expected_amount in row_amount and row_description == description:
-             found = True
-             break
-     assert found, f"Expense not found: {amount}, {description}, {date}"
+    expected_amount = f"${amount}"
+
+    # Wait until at least one table row exists
+    wait.until(
+        EC.presence_of_all_elements_located(
+            (By.CSS_SELECTOR, "table tbody tr")
+        )
+    )
+
+    # Re-query rows AFTER the table has rendered
+    rows = context.driver.find_elements(By.CSS_SELECTOR, "table tbody tr")
+
+    found = False
+
+    for row in rows:
+        cells = row.find_elements(By.TAG_NAME, "td")
+
+        # Safety check (avoid header rows or malformed rows)
+        if len(cells) < 3:
+            continue
+
+        row_date = cells[0].text.strip()
+        row_amount = cells[1].text.strip()
+        row_description = cells[2].text.strip()
+
+        if (
+          row_date == date
+          and expected_amount in row_amount
+          and row_description == description
+        ):
+            found = True
+            break
+
+    print("ROW DEBUG:", [cell.text for cell in cells])
+    assert found, f"Expense not found: {amount}, {description}, {date}"
 
 #@when(u'the employee inputs a new amount: 999')
 #def step_enter_amount(context, amount):
