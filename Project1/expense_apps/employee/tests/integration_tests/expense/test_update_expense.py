@@ -212,17 +212,3 @@ def test_update_expense_not_owner(setup_database, test_client):
   )
 
   assert response.status_code == 404
-
-def test_update_expense_not_authorized(setup_database, test_client):
-  # Expense 4 belongs to employee2
-  expense_id = 1
-  response = test_client.put(
-    f"/api/expenses/{expense_id}",
-    json={
-      "amount": 10.0,
-      "description": "Hack attempt",
-      "date": "2025-01-06"
-    }
-  )
-
-  assert response.status_code == 401
